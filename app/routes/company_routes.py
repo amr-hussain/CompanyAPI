@@ -46,6 +46,7 @@ def get_company(id):
     return jsonify(company), 200
 
 @company_bp.route('/add', methods=['POST'])
+@jwt_required()
 def add_company():
     company = request.get_json()  # Get the JSON data from the request
     if not company:
@@ -57,6 +58,7 @@ def add_company():
         return jsonify({"error": str(e)}), 400
 
 @company_bp.route('/update/<int:id>', methods=['PUT'])
+@jwt_required()
 def update_company(id):
     company = request.get_json()
     if not company:
@@ -68,6 +70,7 @@ def update_company(id):
     return jsonify(company_json), 200
 
 @company_bp.route('/delete/<int:id>', methods=['DELETE'])
+@jwt_required()
 def delete_company(id):
     try:
         message = CompanyServices.delete_company(id)
