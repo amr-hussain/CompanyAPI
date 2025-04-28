@@ -11,7 +11,7 @@ company_bp = Blueprint('company', __name__)
 auth_bp = Blueprint('auth', __name__)
 
 
-@auth_bp.route('/api/auth/register', methods = ['POST'])
+@auth_bp.route('/register', methods = ['POST'])
 def register():
     data = request.get_json()
     
