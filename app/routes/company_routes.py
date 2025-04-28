@@ -14,38 +14,22 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/register', methods = ['POST'])
 def register():
     data = request.get_json()
+    try:
+        message = CompanyServices.register_new_user(data)  
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
     
-    if User.query.filter_by(username = data['username']).first():
-        return jsonify({
-            "message": "User Already Exists!"
-        })
-    
-    new_user = User(username = data['username'])
-    new_user.set_password(data['password'])
-    
-    db.session.add(new_user)
-    db.session.commit()
-    
-    return jsonify({
-        "message": "User Created Successfully!"
-    }), 201
+    return jsonify(message), 201
     
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    user = User.query.filter_by(username = data['username']).first()
+    try:
+        message = CompanyServices.login_user(data)  
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
     
-    if user and user.check_password(data['password']):
-        token = create_access_token(identity=str(user.id))
-        return jsonify({
-            "message": "Login Successful!",
-            "access_token": token
-        }), 200
-        
-    return jsonify({
-        "message": "Invalid Credentials!"
-    }), 401
-
+    return jsonify(message), 201
 
 @company_bp.route('/companies', methods=['GET'])
 def get_companies():
