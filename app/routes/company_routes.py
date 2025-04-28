@@ -1,9 +1,7 @@
 from flask import Blueprint, request, jsonify
-from app.models import Company , User
-from app.schemas.company_schemas import CompanySchema
 from app.services.company_services import CompanyServices
 from app import db
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import jwt_required
 
 
 # adding two blueprints for the company and auth routes 
@@ -30,6 +28,21 @@ def login():
         return jsonify({"error": str(e)}), 401
     
     return jsonify(message), 201
+
+@auth_bp.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    message = CompanyServices.refresh_token()  
+    return jsonify(message), 200
+
+@auth_bp.route('/profile', methods=['GET'])
+@jwt_required()
+def profile():
+    try:
+        user = CompanyServices.get_user_profile()  
+    except Exception as e:
+        return jsonify({"error": str(e)}), 404
+    return jsonify(user), 200
 
 @company_bp.route('/companies', methods=['GET'])
 def get_companies():

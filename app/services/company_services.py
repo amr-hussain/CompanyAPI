@@ -4,7 +4,7 @@ from app.schemas.company_schemas import CompanySchema
 from sqlalchemy.exc import IntegrityError
 from marshmallow.exceptions import ValidationError
 from flask import abort
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, create_access_token, create_refresh_token
 
 class CompanyServices:
     @staticmethod
@@ -78,10 +78,31 @@ class CompanyServices:
     def login_user(data):
         user = User.query.filter_by(username = data['username']).first()
         if user and user.check_password(data['password']):
-            token = create_access_token(identity=str(user.id))
+            access_token = create_access_token(identity=str(user.id))
+            refresh_token = create_refresh_token(identity=str(user.id))
             return {
                 "message": "Login Successful!",
-                "access_token": token
+                "access_token": access_token,
+                "refresh_token": refresh_token
             }
-            
         abort(401, "Invalid Credentials!")
+
+    @staticmethod
+    def refresh_token():
+        logged_in_user = get_jwt_identity()
+        new_access_token = create_access_token(identity=logged_in_user)
+        return {
+            "message": "Access Token Refreshed Successfully!",
+            "access_token": new_access_token
+        }
+    @staticmethod
+    def get_user_profile():
+        user_id = get_jwt_identity()
+        user = User.query.get(int(user_id))
+        if not user:
+            abort(404, "User not found")
+        data = {
+            "id": user.id,
+            "username": user.username
+        }
+        return data
